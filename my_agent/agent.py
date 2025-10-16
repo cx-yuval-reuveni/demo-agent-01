@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 apii_key=os.getenv("AIPROXY_API_KEY")
-print("AIPROXY_API_KEY =", os.getenv("AIPROXY_API_KEY"))  # should NOT be None/empty
 
 model = OpenAIModel(
 client_args={
@@ -20,7 +19,7 @@ client_args={
                 },
             },
     # **model_config
-    model_id="azure/gpt-4o",
+    model_id="bedrock/eu.anthropic.claude-3-7-sonnet-20250219-v1:0",
     params={
         "max_tokens": 1000,
         "temperature": 0.7,
