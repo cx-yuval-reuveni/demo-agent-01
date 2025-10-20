@@ -4,7 +4,7 @@ from strands.models import BedrockModel
 from strands_tools import  calculator
 import os
 from dotenv import load_dotenv
-from my_agent.agent_tools import web_search
+from agent_tools import web_search
 
 
 load_dotenv()
@@ -27,6 +27,14 @@ client_args={
         "temperature": 0.7,
     }
 )
-agent = Agent(model=model, tools=[calculator])
-response = agent("What is 2+2*3-4/2+1")
+
+
+web_agent = Agent(
+    model=model,
+    tools=[web_search],
+    system_prompt="You are a helpful research assistant. You can search the web to answer questions."
+)
+
+# Ask the agent a question that requires searching the web
+response = web_agent("What is the latest news about the OpenTelemetry project?")
 print(response)
