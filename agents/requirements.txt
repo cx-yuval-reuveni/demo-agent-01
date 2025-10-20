@@ -1,0 +1,11 @@
+strands-agents>=1.8.0
+strands-agents-tools>=0.2.7
+mcp==1.13.1
+python-dotenv
+strands
+strands-tools
+python-dotenv
+requests
+beautifulsoup4
+gitpython
+openai

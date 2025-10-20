@@ -4,7 +4,7 @@ from strands.models import BedrockModel
 from strands_tools import  calculator
 import os
 from dotenv import load_dotenv
-from agent_tools import web_search
+from agent_tools.web_tools import web_search
 
 
 load_dotenv()
