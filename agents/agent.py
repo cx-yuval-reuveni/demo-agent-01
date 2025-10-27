@@ -1,7 +1,7 @@
 from strands import Agent
 from strands_tools import  calculator
 import os
-from config_base_model import get_base_model
+from .config_base_model import get_base_model
 
 
 model = get_base_model(

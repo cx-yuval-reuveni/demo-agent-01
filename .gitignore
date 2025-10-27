@@ -1,5 +1,8 @@
 /agents/.env
 /.venv
 /agents/__pycache__/
+/agents/.env
 /venv
+.env
+/agent_tools/__pycache__/
 /.vscode/

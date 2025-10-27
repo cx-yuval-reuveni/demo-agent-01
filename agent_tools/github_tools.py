@@ -3,7 +3,7 @@ import subprocess
 import os
 from typing import Dict, Any, Optional, List
 import time
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 import threading
 import queue
 import logging
@@ -15,7 +15,9 @@ class DockerMCPClient:
     """MCP client that communicates with Docker-based GitHub MCP server"""
     
     def __init__(self):
-        load_dotenv()
+        # Always load the .env file from the project root or nearest location
+        dotenv_path = find_dotenv()
+        load_dotenv(dotenv_path)
         self.github_token = os.getenv("GITHUB_PERSONAL_ACCESS_TOKEN")
         if not self.github_token:
             raise ValueError("GITHUB_PERSONAL_ACCESS_TOKEN environment variable is required")
@@ -27,14 +29,22 @@ class DockerMCPClient:
     def start_docker_mcp_server(self) -> bool:
         """Start the Docker-based MCP GitHub server"""
         try:
-            print("🐳 Starting Docker MCP GitHub server...")
+            print("🐳 STARTING Docker MCP GitHub server...")
+            logging.info("🐳 Starting Docker MCP GitHub server...")
+            
+            # Debug: Check if token is loaded
+            print(f"🔑 GitHub token loaded: {'✅ Yes' if self.github_token else '❌ No'}")
+            if self.github_token:
+                print(f"🔑 Token length: {len(self.github_token)} characters")
+                print(f"🔑 Token starts with: {self.github_token[:8]}...")
             
             # Docker command as configured in your mcp.json
             docker_cmd = [
-                "docker", "run", "-i", "--rm",
+                "docker", "run", "-i", "--name", "github-mcp-server",
                 "-e", f"GITHUB_PERSONAL_ACCESS_TOKEN={self.github_token}",
                 "ghcr.io/github/github-mcp-server"
             ]
+            print(f"🔧 Docker command: {' '.join(docker_cmd)}")
             
             # Start Docker process with stdin/stdout pipes
             self.docker_process = subprocess.Popen(
@@ -51,16 +61,17 @@ class DockerMCPClient:
             
             if init_success:
                 print("✅ Docker MCP GitHub server started successfully")
+                logging.info("✅ Docker MCP GitHub server started successfully")
                 self.is_initialized = True
                 return True
             else:
                 print("❌ Failed to initialize MCP connection")
+                logging.warning("❌ Failed to initialize MCP connection")
                 self.stop_docker_server()
                 return False
                 
         except Exception as e:
             logging.error(f"Failed to start Docker MCP server: {str(e)}")
-            print(f"❌ Failed to start Docker MCP server: {e}")
             return False
     
     def _initialize_mcp_connection(self) -> bool:
@@ -86,8 +97,8 @@ class DockerMCPClient:
             response = self._send_request(init_request)
             
             if response and "result" in response:
-                print("🤝 MCP initialization successful")
-                
+                logging.info("🤝 MCP initialization successful")
+
                 # Send initialized notification
                 initialized_notification = {
                     "jsonrpc": "2.0",
@@ -101,7 +112,6 @@ class DockerMCPClient:
             
         except Exception as e:
             logging.error(f"Failed to initialize MCP connection: {str(e)}")
-            print(f"Failed to initialize MCP: {e}")
             return False
     
     def _send_request(self, request: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -112,7 +122,7 @@ class DockerMCPClient:
         try:
             # Send request
             request_json = json.dumps(request) + "\n"
-            print(f"📤 Sending: {request_json.strip()}")
+            logging.info(f"📤 Sending: {request_json.strip()}")
             
             self.docker_process.stdin.write(request_json)
             self.docker_process.stdin.flush()
@@ -120,15 +130,14 @@ class DockerMCPClient:
             # Read response
             response_line = self.docker_process.stdout.readline()
             if response_line:
-                print(f"📥 Received: {response_line.strip()}")
+                logging.info(f"📥 Received: {response_line.strip()}")
                 return json.loads(response_line)
             else:
-                print("📥 Received empty response")
+                logging.warning("📥 Received empty response")
             return None
             
         except Exception as e:
             logging.error(f"Error sending MCP request: {str(e)}")
-            print(f"Error sending request: {e}")
             return None
     
     def _send_notification(self, notification: Dict[str, Any]) -> None:
@@ -138,14 +147,13 @@ class DockerMCPClient:
         
         try:
             notification_json = json.dumps(notification) + "\n"
-            print(f"📤 Sending notification: {notification_json.strip()}")
+            logging.info(f"📤 Sending notification: {notification_json.strip()}")
             
             self.docker_process.stdin.write(notification_json)
             self.docker_process.stdin.flush()
             
         except Exception as e:
             logging.error(f"Error sending MCP notification: {str(e)}")
-            print(f"Error sending notification: {e}")
     
     def list_tools(self) -> List[Dict[str, Any]]:
         """List available tools from MCP server"""
@@ -209,13 +217,26 @@ class DockerMCPClient:
             try:
                 self.docker_process.terminate()
                 self.docker_process.wait(timeout=5)
-                print("🛑 Docker MCP server stopped")
+                logging.info("🛑 Docker MCP server stopped")
+                
+                # Clean up the named container
+                try:
+                    subprocess.run(["docker", "rm", "github-mcp-server"], 
+                                 capture_output=True, check=False)
+                except Exception as e:
+                    logging.warning(f"Error removing Docker container 'github-mcp-server': {str(e)}")
+                    
             except subprocess.TimeoutExpired:
                 self.docker_process.kill()
-                print("🔪 Docker MCP server killed")
+                logging.warning("🔪 Docker MCP server killed")
+                # Force remove container if killed
+                try:
+                    subprocess.run(["docker", "rm", "-f", "github-mcp-server"], 
+                                 capture_output=True, check=False)
+                except Exception as e:
+                    logging.warning(f"Error force-removing Docker container 'github-mcp-server': {str(e)}")
             except Exception as e:
                 logging.error(f"Error stopping Docker MCP server: {str(e)}")
-                print(f"Error stopping Docker server: {e}")
             finally:
                 self.docker_process = None
                 self.is_initialized = False
@@ -231,6 +252,12 @@ def mcp_get_repository(owner: str, repo: str) -> str:
         logging.error(f"Error getting repository {owner}/{repo}: {str(e)}")
         return json.dumps({"error": str(e)}, indent=2)
 
+mcp_get_repository.__annotations__ = {
+    'owner': str, 
+    'repo': str, 
+    'return': str
+}
+
 def mcp_search_repositories(query: str, limit: int = 5) -> str:
     """Search repositories using Docker MCP"""
     try:
@@ -238,6 +265,7 @@ def mcp_search_repositories(query: str, limit: int = 5) -> str:
     except Exception as e:
         logging.error(f"Error searching repositories with query '{query}': {str(e)}")
         return json.dumps({"error": str(e)}, indent=2)
+    
 
 def mcp_get_file_contents(owner: str, repo: str, path: str) -> str:
     """Get file contents using Docker MCP"""
@@ -246,6 +274,7 @@ def mcp_get_file_contents(owner: str, repo: str, path: str) -> str:
     except Exception as e:
         logging.error(f"Error getting file contents {owner}/{repo}:{path}: {str(e)}")
         return json.dumps({"error": str(e)}, indent=2)
+
 
 def mcp_list_tools() -> str:
     """List available MCP tools"""
@@ -291,7 +320,6 @@ def cleanup_mcp_client():
             mcp_client.stop_docker_server()
         except Exception as e:
             logging.error(f"Error during MCP client cleanup: {str(e)}")
-            print(f"Error during cleanup: {e}")
 
 # Register cleanup on exit
 atexit.register(cleanup_mcp_client)

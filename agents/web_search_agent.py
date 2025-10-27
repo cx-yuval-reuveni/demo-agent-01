@@ -1,7 +1,7 @@
 from strands import Agent
 from strands.models.openai import OpenAIModel
 from strands.models import BedrockModel
-from strands_tools import  calculator
+from strands_tools import  calculator, web_search
 import os
 from dotenv import load_dotenv
 from agent_tools.web_tools import web_search
