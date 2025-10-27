@@ -62,4 +62,4 @@ if __name__ == "__main__":
     github_agent = create_github_agent()
     
     # Test the agent
-    response = github_agent("Analyze the 'https://github.com/cx-yuval-reuveni/repo-1' repository and create a comprehensive README for it")
+    response = github_agent("Analyze the 'https://github.com/cx-yuval-reuveni/demo-agent-1' repository and create a comprehensive README file for it. commit the README to the repository.")
