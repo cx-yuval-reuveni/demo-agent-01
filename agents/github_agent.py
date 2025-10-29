@@ -13,7 +13,6 @@ from agent_tools.github_tools import (
 )
 from .config_base_model import get_base_model
 
-
 load_dotenv()
 
 def create_github_agent():
@@ -54,12 +53,19 @@ def create_github_agent():
     
     return gh_agent
 
-# This block only runs when the file is executed directly
-if __name__ == "__main__":
+def main():
+    """Main function for CLI usage"""
     print("=== Testing MCP GitHub Agent ===")
     
     # Create the agent
     github_agent = create_github_agent()
     
     # Test the agent
-    response = github_agent("Analyze the 'https://github.com/cx-yuval-reuveni/demo-agent-1' repository and create a comprehensive README file for it. commit the README to the repository.")
+    response = github_agent("Do not use any tool just say hi to confirm you are working with the GitHub MCP agent.")
+    print(response)
+    return response
+
+
+# This block only runs when the file is executed directly
+if __name__ == "__main__":
+    main()

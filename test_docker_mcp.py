@@ -49,5 +49,10 @@ def test_docker_mcp_client():
     
     return True
 
+
+def main():
+    """Main function for CLI usage"""
+    return test_docker_mcp_client()
+
 if __name__ == "__main__":
     test_docker_mcp_client()
