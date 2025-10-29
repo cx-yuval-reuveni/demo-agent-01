@@ -14,4 +14,3 @@ model = get_base_model(
 
 agent = Agent(model=model, tools=[calculator])
 response = agent("What is 2+2*3-4/2+1")
-print(response)
