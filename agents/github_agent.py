@@ -18,7 +18,9 @@ load_dotenv()
 def create_github_agent():
     """Create and return the GitHub MCP agent"""
     model = get_base_model(max_tokens=30000)
-    
+    #mcp client config\creation
+    #connect to gh mcp server
+    #tool collection
     gh_agent = Agent(
         model=model,
         tools=[
@@ -62,7 +64,6 @@ def main():
     
     # Test the agent
     response = github_agent("Do not use any tool just say hi to confirm you are working with the GitHub MCP agent.")
-    print(response)
     return response
 
 

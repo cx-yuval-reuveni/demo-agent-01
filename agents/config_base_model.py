@@ -10,7 +10,7 @@ def get_base_model(model_id: str="bedrock/claude-sonnet-4", stream: bool = True,
     api_key=os.getenv("AIPROXY_API_KEY")
     if not api_key:
         raise ValueError("AIPROXY_API_KEY environment variable is required")
-    stream = "/stream" if stream else ""
+    stream = "/stream"
     model = OpenAIModel(
     client_args={
                     "api_key": api_key,
