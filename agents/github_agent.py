@@ -34,7 +34,6 @@ def github_server_params() -> StdioServerParameters:
 async def main():
     public_key = os.getenv("LANGFUSE_PUBLIC_KEY")
     secret_key = os.getenv("LANGFUSE_SECRET_KEY")
-    base_url = os.getenv("LANGFUSE_BASE_URL")
 
     if public_key and secret_key:
         LANGFUSE_AUTH = base64.b64encode(f"{public_key}:{secret_key}".encode()).decode()
