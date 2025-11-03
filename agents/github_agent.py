@@ -53,8 +53,7 @@ async def main():
         tools=[github_mcp_client],
         trace_attributes={
             "session.id": "first-github-agent-session",
-            "user.id": "yuval.reuveni@checkmarx.com",
-
+            "user.id": "yuval.reuveni@checkmarx.com"
         },
     )
     result = agent("analyze the repository and create readme file ")
