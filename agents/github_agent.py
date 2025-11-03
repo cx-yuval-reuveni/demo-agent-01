@@ -56,8 +56,7 @@ async def main():
             "user.id": "yuval.reuveni@checkmarx.com"
         },
     )
-    result = agent("analyze the repository and create readme file ")
-    print("Agent Result:", result)
+    result = agent("analyze the repository https://github.com/cx-yuval-reuveni/demo-agent-01 and create readme.md file and add instructions on how to run the agent")
 
 
 if __name__ == "__main__":
