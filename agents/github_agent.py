@@ -51,16 +51,18 @@ async def main():
 ##experimental
 # create random session id
     github_mcp_client = MCPClient(lambda: stdio_client(github_server_params()))
-    agent = Agent(
-        model=model,
-        system_prompt="You are a helpful GitHub assistant that uses available tools to answer questions.",
-        tools=[github_mcp_client],
-        trace_attributes={
-            "session.id": f"first-github-agent-session-{random_session}",
-            "user.id": "yuval.reuveni@checkmarx.com"
-        },
-    )
-    result = agent("analyze the repository https://github.com/cx-yuval-reuveni/demo-agent-01 and create readme.md file and add instructions on how to run the agent. you should name the readme file in the form of: 'README for session {random_session}.md'")
+    with github_mcp_client:
+        tools = github_mcp_client.list_tools_sync()
+        agent = Agent(
+            model=model,
+            system_prompt="You are a helpful GitHub assistant that uses available tools to answer questions.",
+            tools=tools,
+            trace_attributes={
+                "session.id": f"first-github-agent-session-{random_session}",
+                "user.id": "yuval.reuveni@checkmarx.com"
+            },
+        )
+        agent("analyze the repository https://github.com/cx-yuval-reuveni/demo-agent-01 and create readme.md file and add instructions on how to run the agent. you should name the readme file in the form of: 'README for session {random_session}.md'")
 
 
 if __name__ == "__main__":
