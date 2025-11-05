@@ -7,6 +7,7 @@ from config_base_model import get_base_model
 from langfuse import get_client as get_langfuse_client
 from langfuse import observe, get_client
 import base64
+import numpy as np
 
 
 load_dotenv()
@@ -33,6 +34,7 @@ def github_server_params() -> StdioServerParameters:
 # Use the agent with a prompt that requires a GitHub action
 
 async def main():
+    random_session = np.random.randint(0,1000)
     public_key = os.getenv("LANGFUSE_PUBLIC_KEY")
     secret_key = os.getenv("LANGFUSE_SECRET_KEY")
 
@@ -41,22 +43,24 @@ async def main():
         os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}"
 
     from strands.telemetry import StrandsTelemetry
+    #what does telemetry do?
     strands_telemetry = StrandsTelemetry().setup_otlp_exporter()
 
     model = get_base_model(max_tokens=30000)
 
-    # MCPClient expects a callable that returns a context manager
+##experimental
+# create random session id
     github_mcp_client = MCPClient(lambda: stdio_client(github_server_params()))
     agent = Agent(
         model=model,
         system_prompt="You are a helpful GitHub assistant that uses available tools to answer questions.",
         tools=[github_mcp_client],
         trace_attributes={
-            "session.id": "first-github-agent-session",
+            "session.id": f"first-github-agent-session-{random_session}",
             "user.id": "yuval.reuveni@checkmarx.com"
         },
     )
-    result = agent("analyze the repository https://github.com/cx-yuval-reuveni/demo-agent-01 and create readme.md file and add instructions on how to run the agent")
+    result = agent("analyze the repository https://github.com/cx-yuval-reuveni/demo-agent-01 and create readme.md file and add instructions on how to run the agent. you should name the readme file in the form of: 'README for session {random_session}.md'")
 
 
 if __name__ == "__main__":
