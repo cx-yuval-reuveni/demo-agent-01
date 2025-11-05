@@ -5,6 +5,7 @@ from strands.tools.mcp import MCPClient
 from dotenv import load_dotenv
 from config_base_model import get_base_model
 from langfuse import get_client as get_langfuse_client
+from langfuse import observe, get_client
 import base64
 
 
