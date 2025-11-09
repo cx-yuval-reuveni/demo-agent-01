@@ -78,8 +78,8 @@ async def main():
             result = agent(
                 f"Analyze https://github.com/{repo_path} and create a README with setup (uv, make), "
                 f"environment variables, how to run this github_agent, GitHub MCP usage (manual vs managed), "
-                f"troubleshooting (network errors). Name (do not write) the file: 'README for repo {repo_name} session {random_session}.md'. "
-                f"Return only the README content."
+                f"troubleshooting (network errors). Name the file: 'README for repo {repo_name} session {random_session}.md'. "
+                f"Save the readme file in READMEs folder."
             )
             print(result)
         except Exception as e:
