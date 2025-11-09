@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from langfuse import observe, get_client as get_langfuse_client
 
 
-def get_base_model(model_id: str="bedrock/claude-sonnet-4", stream: bool = True, x_request_id: str = "demo-request-strands-123", x_feature: str = "yuval-demo-strands", max_tokens: int = 1000, temperature: float = 0.7) -> OpenAIModel:
+def get_base_model(model_id: str="bedrock/amazon.nova-pro-v1:0", stream: bool = True, x_request_id: str = "demo-request-strands-123", x_feature: str = "yuval-demo-strands", max_tokens: int = 1000, temperature: float = 0.7) -> OpenAIModel:
     load_dotenv()
 
     api_key=os.getenv("AIPROXY_API_KEY")
