@@ -43,10 +43,11 @@ async def main():
         os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}"
 
     from strands.telemetry import StrandsTelemetry
-    #what does telemetry do?
+    # Configure the telemetry
+    # (Creates new tracer provider and sets it as global)
     strands_telemetry = StrandsTelemetry().setup_otlp_exporter()
 
-    model = get_base_model(max_tokens=30000)
+    model = get_base_model(max_tokens=8000)
 
 ##experimental
 # create random session id
