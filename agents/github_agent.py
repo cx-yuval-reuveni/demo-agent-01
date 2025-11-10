@@ -9,6 +9,10 @@ from langfuse import observe, get_client
 import base64
 import numpy as np
 
+try:
+    from httpx import RemoteProtocolError
+except ImportError:
+    RemoteProtocolError = Exception
 
 load_dotenv()
 
@@ -31,16 +35,6 @@ def github_server_params() -> StdioServerParameters:
         env={"GITHUB_PERSONAL_ACCESS_TOKEN": github_token}
     )
  
-async def run_task(agent, repo_path, random_session):
-    repo_name = repo_path.split("/")[-1]
-    prompt = (
-        f"Phase 1: List important files in https://github.com/{repo_path}. "
-        f"Phase 2: Summarize their purpose. "
-        f"Phase 3: Draft a concise README with install + run steps for the GitHub agent. "
-        f"Name output file: README for repo {repo_name} session {random_session}.md "
-        f"Return final README content directly; do not attempt to write the file."
-    )
-    return agent(prompt)
 
 # Use the agent with a prompt that requires a GitHub action
 
