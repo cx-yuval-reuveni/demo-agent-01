@@ -19,9 +19,10 @@ def summarizer_assistant(query: str) -> str:
     """
     try:
         # Strands Agents SDK makes it easy to create a specialized agent
+        model = get_base_model()
         summarizer_agent = Agent(
             system_prompt=SUMMARIZER_ASSISTANT_PROMPT,
-            base_model=get_base_model()
+            model=model,
         )
 
         # Call the agent and return its response
