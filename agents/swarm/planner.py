@@ -1,6 +1,7 @@
 import os
 from strands import Agent
 from agents.swarm.summarizer import summarizer_assistant  # absolute import
+from langfuse import observe
 from agents.config_base_model import get_base_model  # absolute import
 from mcp import StdioServerParameters, stdio_client
 from strands.tools.mcp import MCPClient
@@ -12,9 +13,16 @@ load_dotenv()
 
 
 MAIN_SYSTEM_PROMPT = """
-You are a planner agent that delegates tasks to specialized assistants.
-You have access to github mcp_tool to extract the folder structure from GitHub repositories.
-you should only extract the file structure of a repo."""
+You are a swarm planner agent that delegates tasks to specialized assistants.
+You have access to the following specialized assistants:
+1. Summarizer Assistant: Use this assistant to generate concise summaries of file content.
+you must give clear instructions to the Summarizer Assistant about what needs to be summarized.
+you must always provide full path to the repo and file in your instructions.
+You have access to github mcp_tool to retrieve file contents from GitHub repositories.
+When given a user query, determine if it requires summarization.
+If it does, delegate the task to the Summarizer Assistant.
+Always provide clear instructions to the specialized assistant about what needs to be summarized."""
+
 
 
 #"your job is to extract the file structure from the repo and identify files that need to be summarized."
@@ -72,14 +80,14 @@ async def main():
             tools=tools,
             model=model,
             trace_attributes={
-                "session.id": f"multiagent-mock-{random_session}",
+                "session.id": f"multiagent-{random_session}",
                 "user.id": "yuval.reuveni@checkmarx.com",
                 "repo.name": repo_name,
             },
         )
         try:
             result = planner_agent(
-                f"Read the repo structure without reading the content of the files: https://github.com/{repo_path} and create a graph of the file structure. add the files that are inside the folders as well."
+                f"Read the repo structure without reading the content of the files: https://github.com/{repo_path} and create a graph of the file structure, ignore the READMEs folder. add the files that are inside the folders as well. distribute the files that need to be summarized to the Summarizer Assistant."
             )
         except Exception as e:
             print(f"[error] agent invocation failed: {e}")
